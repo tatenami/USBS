@@ -1,8 +1,9 @@
-SRCS = simple.cpp
+SRCS = test.cpp
+LIBSRCS = USBSerial.cpp
 TARGET = ${SRCS:.cpp=}
 
 ${TARGET}: ${SRCS}
-	g++ -o $@ $<
+	g++ -o $@ $< ${LIBSRCS}
 
 
 clean:
