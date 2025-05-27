@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <linux/serial.h>
 #include <fcntl.h>
 #include <termios.h>
 #include <unistd.h>
@@ -15,13 +16,17 @@ class USBSerial {
  private:
   int fd_;
   int baud_rate_{B115200};
+  bool available_;
   termios tio_config_;
   std::string dev_file_;
-  bool available_;
+
+ private:
+  void setLowLatency();
 
  public:
   USBSerial(char* dev_file);
   // void setBaudRate();
+  int getBufSize();
   bool available();
   bool sendData(void *buf, int size);
   bool receiveData(void *buf, int size);
@@ -29,25 +34,13 @@ class USBSerial {
   template <typename T>
   bool sendData(T *buf) {
     int len = write(fd_, buf, sizeof(T));
-    
-    if (len < 0) {
-      return false;
-    }
-    else {
-      return true;
-    }
+    return len >= 0;
   }
 
   template <typename T>
   bool receiveData(T *buf) {
     int len = read(fd_, buf, sizeof(T));
-
-    if (len < 0) {
-      return false;
-    }
-    else {
-      return true;
-    }
+    return len >= 0;
   }
 };
 

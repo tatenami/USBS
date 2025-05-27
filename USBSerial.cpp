@@ -28,30 +28,32 @@ USBSerial::USBSerial(char *dev_file) {
   tcsetattr(fd_, TCSANOW, &tio_config_);
 }
 
+void USBSerial::setLowLatency() {
+  // カーネルのデータ受信時の待ち時間を無効化
+  serial_struct serial_setting;
+  ioctl(fd_, TIOCGSERIAL, &serial_setting);
+  serial_setting.flags |= ASYNC_LOW_LATENCY;
+  ioctl(fd_, TIOCSSERIAL, &serial_setting);
+}
+
+int USBSerial::getBufSize() {
+  int available_size = 0;
+  ioctl(fd_, FIONREAD, &available_size);
+  return available_size;
+}
+
 bool USBSerial::available() {
   return available_;
 }
 
 bool USBSerial::sendData(void *buf, int size) {
   int len = write(fd_, buf, size);
-  
-  if (len < 0) {
-    return false;
-  }
-  else {
-    return true;
-  }
+  return len >= 0;
 }
 
 
 bool USBSerial::receiveData(void *buf, int size) {
   int len = read(fd_, buf, size);
-
-  if (len < 0) {
-    return false;
-  }
-  else {
-    return true;
-  }
+  return len >= 0;
 }
 
